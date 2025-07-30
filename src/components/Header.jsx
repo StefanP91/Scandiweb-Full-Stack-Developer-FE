@@ -4,6 +4,15 @@ import { useCart } from "../contexts/CartContext";
 import CartOverlay from "./CartOverlay";
 import '../index.css';
 
+// GraphQL query to get all categories
+const GET_CATEGORIES_QUERY = `
+    query {
+        categories {
+            name
+        }
+    }
+`;
+
 const Header = () => {
   const [activeLink, setActiveLink] = useState(null);
   const [transitioningLink, setTransitioningLink] = useState(null);
@@ -14,11 +23,38 @@ const Header = () => {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderError, setOrderError] = useState(null);
+  const [categories, setCategories] = useState([]);
+
+  // FETCH CATEGORIES
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/backend/public/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: GET_CATEGORIES_QUERY })
+        });
+        
+        const result = await response.json();
+        setCategories(result.data.categories || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // SET ACTIVE LINK
   useEffect(() => {
     const currentPath = location.pathname;
-    setActiveLink(currentPath === '/' ? '/all' : currentPath);
+    if (currentPath === '/') {
+      setActiveLink('/all');
+    } else if (currentPath.startsWith('/category/')) {
+      setActiveLink(currentPath);
+    } else {
+      setActiveLink(currentPath);
+    }
   }, [location.pathname]);
 
   // CLOSE CART ON OUTSIDE CLICK
@@ -161,33 +197,32 @@ const Header = () => {
                 <li className="nav-item">
                     <Link
                         className={`header-link ${activeLink === '/all' ? 'active' : ''} ${transitioningLink === '/all' ? 'transitioning' : ''}`}
-                        to="/all"
+                        to="/"
                         data-testid={activeLink === '/all' ? 'active-category-link' : 'category-link'}
                         onClick={() => handleLinkClick('/all')}
                     >
                     ALL
                     </Link>
                 </li>
-                <li className="nav-item">
-                    <Link
-                        className={`header-link ${activeLink === '/clothes' ? 'active' : ''} ${transitioningLink === '/clothes' ? 'transitioning' : ''}`}
-                        to="/clothes"
-                        data-testid={activeLink === '/clothes' ? 'active-category-link' : 'category-link'}
-                        onClick={() => handleLinkClick('/clothes')}
-                    >
-                    CLOTHES
-                    </Link>
-                </li>
-                <li className="nav-item">
-                    <Link
-                        className={`header-link ${activeLink === '/tech' ? 'active' : ''} ${transitioningLink === '/tech' ? 'transitioning' : ''}`}
-                        to="/tech"
-                        data-testid={activeLink === '/tech' ? 'active-category-link' : 'category-link'}
-                        onClick={() => handleLinkClick('/tech')}
-                    >
-                    TECH
-                    </Link>
-                </li>
+                
+                {categories.map(category => {
+                  const categoryPath = `/category/${category.name.toLowerCase()}`;
+                  const isActive = activeLink === categoryPath;
+                  const isTransitioning = transitioningLink === categoryPath;
+                  
+                  return (
+                    <li className="nav-item" key={category.name}>
+                        <Link
+                            className={`header-link ${isActive ? 'active' : ''} ${isTransitioning ? 'transitioning' : ''}`}
+                            to={categoryPath}
+                            data-testid={isActive ? 'active-category-link' : 'category-link'}
+                            onClick={() => handleLinkClick(categoryPath)}
+                        >
+                        {category.name.toUpperCase()}
+                        </Link>
+                    </li>
+                  );
+                })}
             </ul>
           </div>
 

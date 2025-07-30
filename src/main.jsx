@@ -5,8 +5,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
 // Main Pages
 import Root from './Root.jsx'
 import All from './pages/All.jsx'
-import Clothes from './pages/Clothes.jsx'
-import Tech from './pages/Tech.jsx'
+import Category from './pages/Category.jsx'
 
 // Subpages
 import ProductDetail from './pages/ProductDetail.jsx'
@@ -27,19 +26,10 @@ const router = createBrowserRouter([
         index: true,
         element: <All />,
       },
-      {
-        path: '/all',
-        element: <All />,
-      },
 
       {
-        path: '/clothes',
-        element: <Clothes />
-      },
-
-      {
-        path: '/tech',
-        element: <Tech />
+        path: '/category/:category',
+        element: <Category />,
       },
 
       {
