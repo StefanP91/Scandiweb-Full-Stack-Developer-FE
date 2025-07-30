@@ -5,6 +5,37 @@ import { useCart } from '../contexts/CartContext';
 import Loading from '../components/Loading';
 import ErrorPage from './ErrorPage';
 
+const getProductsByCategoryQuery = (category) => `
+    query {
+        products(category: "${category}") {
+            id
+            name
+            brand
+            inStock
+            gallery
+            description
+            category
+            attributes {
+                id
+                name
+                type
+                items {
+                    id
+                    value
+                    displayValue
+                }
+            }
+            prices {
+                amount
+                currency {
+                    label
+                    symbol
+                }
+            }
+        }
+    }
+`;
+
 const Tech = () => {
     const [products, setProducts] = useState([]);
     const [error, setError] = useState(null);
@@ -17,43 +48,11 @@ const Tech = () => {
     // FETCH
     useEffect(() => {
         const fetchProductsByCategory = async () => {
-
-            const query = `
-                query {
-                    products(category: "${categoryName}") {
-                        id
-                        name
-                        brand
-                        inStock
-                        gallery
-                        description
-                        category
-                        attributes {
-                            id
-                            name
-                            type
-                            items {
-                                id
-                                value
-                                displayValue
-                            }
-                        }
-                        prices {
-                            amount
-                            currency {
-                                label
-                                symbol
-                            }
-                        }
-                    }
-                }
-            `;
-
             try {
                 const response = await fetch('/backend/public/graphql', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
+                    body: JSON.stringify({ query: getProductsByCategoryQuery(categoryName) })
                 });
                 
                 const result = await response.json();
