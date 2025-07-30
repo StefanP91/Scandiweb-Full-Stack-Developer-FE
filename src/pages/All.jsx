@@ -5,6 +5,42 @@ import { useCart } from '../contexts/CartContext';
 import Loading from '../components/Loading';
 import ErrorPage from './ErrorPage';
 
+const GET_ALL_PRODUCTS_QUERY = `
+    query {
+        products {
+            id
+            name
+            brand
+            inStock
+            gallery
+            description
+            category
+            attributes {
+                id
+                name
+                type
+                items {
+                    id
+                    value
+                    displayValue
+                    typename
+                }
+                typename
+            }
+            prices {
+                amount
+                currency {
+                    label
+                    symbol
+                    typename
+                }
+                typename
+            }
+            typename
+        }
+    }
+`;
+
 const All = () => {
     const [products, setProducts] = useState([]);
     const [error, setError] = useState(null);
@@ -14,48 +50,11 @@ const All = () => {
     // FETCH
     useEffect(() => {
         const fetchProductsByCategory = async () => {
-
-            const query = `
-                query {
-                    products {
-                        id
-                        name
-                        brand
-                        inStock
-                        gallery
-                        description
-                        category
-                        attributes {
-                            id
-                            name
-                            type
-                            items {
-                                id
-                                value
-                                displayValue
-                                typename
-                            }
-                            typename
-                        }
-                        prices {
-                            amount
-                            currency {
-                                label
-                                symbol
-                                typename
-                            }
-                            typename
-                        }
-                        typename
-                    }
-                }
-            `;
-
             try {
                 const response = await fetch('/backend/public/graphql', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
+                    body: JSON.stringify({ query: GET_ALL_PRODUCTS_QUERY })
                 });
                 
                 const result = await response.json();
