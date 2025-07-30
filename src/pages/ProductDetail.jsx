@@ -7,6 +7,37 @@ import { useCart } from "../contexts/CartContext";
 import Loading from "../components/Loading";
 import ErrorPage from "./ErrorPage";
 
+const GET_PRODUCT_DETAILS_QUERY = `
+    query {
+        products {
+            id
+            name
+            brand
+            inStock
+            gallery
+            description
+            category
+            attributes {
+                id
+                name
+                type
+                items {
+                    id
+                    value
+                    displayValue
+                }
+            }
+            prices {
+                amount
+                currency {
+                    label
+                    symbol
+                }
+            }
+        }
+    }
+`;
+
 const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -23,42 +54,11 @@ const ProductDetail = () => {
             setLoading(true); 
             setError(null);
 
-            const query = `
-                query {
-                    products {
-                        id
-                        name
-                        brand
-                        inStock
-                        gallery
-                        description
-                        category
-                        attributes {
-                            id
-                            name
-                            type
-                            items {
-                                id
-                                value
-                                displayValue
-                            }
-                        }
-                        prices {
-                            amount
-                            currency {
-                                label
-                                symbol
-                            }
-                        }
-                    }
-                }
-            `;
-
             try {
                 const response = await fetch('/backend/public/graphql', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
+                    body: JSON.stringify({ query: GET_PRODUCT_DETAILS_QUERY })
                 });
                 
                 const result = await response.json();
