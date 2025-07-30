@@ -619,6 +619,10 @@ header{
     }
 }
 
+.py-6{
+    padding-top: 5rem !important;
+}
+
 /* ERROR PAGE */
 .error-page{
     & .error-content{

@@ -178,7 +178,7 @@ const ProductDetail = () => {
     } 
 
     return (
-        <div className="container py-5 product-detail">
+        <div className="container py-6 product-detail">
             <div className="row">
                 <div className="col-md-2 col-lg-1">
                     <div className="image-thumbnails mt-3">
