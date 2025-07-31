@@ -166,7 +166,7 @@ header{
             }
         }
 
-        & .my-bag{
+        & .cart-overlay{
             position: absolute;
             top: 180%;
             right: 15%;
@@ -731,7 +731,7 @@ header{
         & .card-container{
             position: relative;
 
-            & .my-bag{
+            & .cart-overlay{
                 left: 0;
             }
         }
@@ -826,7 +826,7 @@ header{
         & .card-container{
             position: relative;
 
-            & .my-bag{
+            & .cart-overlay{
                 left: 0;
                 max-height: 100vh;
 

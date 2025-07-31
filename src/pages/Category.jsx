@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { useCart } from '../contexts/CartContext';
-import { useOverlay } from '../contexts/OverlayContext';
+import { useCartOverlay } from '../hooks/useCartOverlay';
 
 import Loading from '../components/Loading';
 import ErrorPage from './ErrorPage';
@@ -39,11 +38,10 @@ const getProductsByCategoryQuery = (category) => `
 
 const Category = () => {
     const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const { addToCart, toggleCart } = useCart();
-    const { setIsOverlayActive, setIsBodyScrollDisabled } = useOverlay();
+    const { addToCartWithOverlay } = useCartOverlay();
 
     const { category } = useParams();
     const categoryName = category;
@@ -98,11 +96,7 @@ const Category = () => {
             selectedAttributes: defaultSelectedAttributes
         };
         
-        addToCart(productToAdd);
-        toggleCart(); 
-
-        setIsOverlayActive(true);
-        setIsBodyScrollDisabled(true);
+        addToCartWithOverlay(productToAdd);
     };
 
     // LOADING

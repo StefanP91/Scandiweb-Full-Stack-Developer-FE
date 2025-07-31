@@ -9,12 +9,12 @@ function Root() {
   
   return (
     <>
+      <OverlayProvider>
         <CartProvider>
-          <OverlayProvider>
-            <Header />
-            <Main />
-          </OverlayProvider>
-        </CartProvider>
+          <Header />
+          <Main />
+          </CartProvider>
+      </OverlayProvider>
     </>
   )
 }

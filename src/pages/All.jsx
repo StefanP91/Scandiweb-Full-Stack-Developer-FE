@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { useCart } from '../contexts/CartContext';
-import { useOverlay } from '../contexts/OverlayContext';
+import { useCartOverlay } from '../hooks/useCartOverlay';
 
 import Loading from '../components/Loading';
 import ErrorPage from './ErrorPage';
@@ -46,12 +45,11 @@ const All = () => {
     const [products, setProducts] = useState([]);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { addToCart, toggleCart } = useCart();
-    const { setIsOverlayActive, setIsBodyScrollDisabled } = useOverlay();
+    const { addToCartWithOverlay } = useCartOverlay();
 
     // FETCH
     useEffect(() => {
-        const fetchProductsByCategory = async () => {
+        const fetchAllProducts = async () => {
             try {
                 const response = await fetch('/backend/public/graphql', {
                     method: 'POST',
@@ -69,7 +67,7 @@ const All = () => {
             }
         };
 
-        fetchProductsByCategory();
+        fetchAllProducts();
 
     }, []);
 
@@ -92,10 +90,7 @@ const All = () => {
             selectedAttributes: defaultSelectedAttributes
         };
         
-        addToCart(productToAdd);
-        toggleCart(); 
-        setIsOverlayActive(true);
-        setIsBodyScrollDisabled(true);
+        addToCartWithOverlay(productToAdd);
     };
 
     //LOADING

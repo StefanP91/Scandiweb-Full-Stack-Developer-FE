@@ -1,8 +1,8 @@
 import { Link, useLocation } from "react-router";
 import { useState, useEffect, useRef } from "react";
-import { useCart } from "../contexts/CartContext";
-import { useOverlay } from "../contexts/OverlayContext";
 import CartOverlay from "./CartOverlay";
+import { useCartOverlay } from "../hooks/useCartOverlay";
+
 import '../index.css';
 
 const GET_CATEGORIES_QUERY = `
@@ -16,16 +16,10 @@ const GET_CATEGORIES_QUERY = `
 const Header = () => {
   const [activeLink, setActiveLink] = useState(null);
   const [transitioningLink, setTransitioningLink] = useState(null);
-  const location = useLocation();
-  const { cartItems, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, setCartItems } = useCart();
-  const { setIsOverlayActive, setIsBodyScrollDisabled } = useOverlay();
-  const mobileMenuRef = useRef(null);
-  const mobileCartRef = useRef(null);
-  const desktopCartRef = useRef(null);
-  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const [orderError, setOrderError] = useState(null);
   const [categories, setCategories] = useState([]);
+  const { orderSuccess, closeCart, setOrderSuccess } = useCartOverlay();
+  const location = useLocation();
+  const mobileMenuRef = useRef(null);
 
   // FETCH CATEGORIES
   useEffect(() => {
@@ -59,36 +53,19 @@ const Header = () => {
     }
   }, [location.pathname]);
 
-  // CLOSE CART ON OUTSIDE CLICK
-  useEffect(() => {
-    if (!isCartOpen) return;
-    const handleClickOutside = (event) => {
-      if (
-        (!mobileCartRef.current || !mobileCartRef.current.contains(event.target)) &&
-        (!desktopCartRef.current || !desktopCartRef.current.contains(event.target))
-      ) {
-        setIsCartOpen(false);
-        setIsOverlayActive(false);
-        setIsBodyScrollDisabled(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isCartOpen, setIsCartOpen, setIsOverlayActive, setIsBodyScrollDisabled]);
-
   // AUTO CLOSE CART AFTER ORDER SUCCESS
   useEffect(() => {
     if (orderSuccess) {
       const timer = setTimeout(() => {
-        setOrderSuccess(false);
-        setIsCartOpen(false);
-        setIsOverlayActive(false);
-        setIsBodyScrollDisabled(false);
+        if (setOrderSuccess) {
+          setOrderSuccess(false);
+        }
+        closeCart();
       }, 3000);
 
       return () => clearTimeout(timer);
     }
-  }, [orderSuccess, setIsCartOpen, setIsOverlayActive, setIsBodyScrollDisabled]);
+  }, [orderSuccess, closeCart, setOrderSuccess]);
 
   // HANDLE LINK CLICK
   const handleLinkClick = (link) => {
@@ -99,79 +76,6 @@ const Header = () => {
     }
     if (mobileMenuRef.current?.getAttribute('aria-expanded') === 'true') {
       mobileMenuRef.current.click();
-    }
-  };
-
-  // TOGGLE CART
-  const toggleCart = () => {
-      const newState = !isCartOpen;
-      setIsCartOpen(newState);
-      setIsOverlayActive(newState);
-      setIsBodyScrollDisabled(newState);
-  };
-
-  // CALCULATE TOTAL PRICE
-  const totalPrice = cartItems.reduce((sum, item) => {
-    const itemPrice = item.prices[0].amount;
-    const quantity = item.quantity || 1;
-    return sum + (itemPrice * quantity);
-  }, 0).toFixed(2);
-
-  const currencySymbol = cartItems.length > 0 ? cartItems[0].prices[0].currency.symbol : '$';
-
-  // PLACE ORDER FUNCTION
-  const handlePlaceOrder = async () => {
-    if (cartItems.length === 0) return;
-    setIsPlacingOrder(true);
-    setOrderError(null);
-    setOrderSuccess(false);
-
-    try {
-      const orderItems = cartItems.map(item => ({
-        productId: item.id,
-        quantity: item.quantity || 1,
-        price: item.prices?.[0]?.amount || 0,
-        selectedAttributes: item.selectedAttributes ?
-          Object.entries(item.selectedAttributes).map(([name, value]) => ({ name, value })) : []
-      }));
-
-      const query = `
-        mutation CreateOrder($input: OrderInput!) {
-          createOrder(input: $input) {
-            id
-            orderNumber
-            createdAt
-            total
-          }
-        }
-      `;
-
-      const variables = {
-        input: {
-          items: orderItems,
-          currency: cartItems[0]?.prices[0]?.currency?.symbol || 'USD'
-        }
-      };
-
-      const response = await fetch('/backend/public/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables })
-      });
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const result = await response.json();
-      if (result.errors) throw new Error(result.errors.map(e => e.message).join(', '));
-
-      setCartItems([]);
-      setOrderSuccess(true);
-    } catch (error) {
-      console.error('Order error:', error);
-      setOrderError(error.message || 'Failed to place order. Please try again.');
-      setTimeout(() => setOrderError(null), 3000);
-    } finally {
-      setIsPlacingOrder(false);
     }
   };
 
@@ -226,22 +130,7 @@ const Header = () => {
           </Link>
 
           <div className="cart"> 
-                <CartOverlay
-                isMobile={isMobile}
-                cartItems={cartItems}
-                isCartOpen={isCartOpen}
-                mobileCartRef={mobileCartRef}
-                desktopCartRef={desktopCartRef}
-                toggleCart={toggleCart}
-                updateQuantity={updateQuantity}
-                removeFromCart={removeFromCart}
-                handlePlaceOrder={handlePlaceOrder}
-                isPlacingOrder={isPlacingOrder}
-                orderError={orderError}
-                orderSuccess={orderSuccess}
-                totalPrice={totalPrice}
-                currencySymbol={currencySymbol}
-            />
+                <CartOverlay isMobile={isMobile} />
           </div>
 
           <button ref={mobileMenuRef} type="button" className="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
