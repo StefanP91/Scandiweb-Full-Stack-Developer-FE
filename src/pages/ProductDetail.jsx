@@ -3,6 +3,7 @@ import { useParams } from "react-router";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from 'rehype-raw'
 import { useCart } from "../contexts/CartContext";
+import { useOverlay } from "../contexts/OverlayContext";
 
 import Loading from "../components/Loading";
 import ErrorPage from "./ErrorPage";
@@ -47,6 +48,7 @@ const ProductDetail = () => {
     const [hasInteractedWithAttributes, setHasInteractedWithAttributes] = useState(false);
     const { productId } = useParams();
     const { addToCart, setIsCartOpen } = useCart();
+    const { setIsOverlayActive, setIsBodyScrollDisabled } = useOverlay();
 
     // FETCH PRODUCT DETAILS
     useEffect(() => {
@@ -102,13 +104,9 @@ const ProductDetail = () => {
         };
         
         addToCart(productToAdd);
-
         setIsCartOpen(true);
-
-        const mainElement = document.querySelector('main');
-        if (mainElement) {
-            mainElement.classList.add('overlay-active');
-        }
+        setIsOverlayActive(true);
+        setIsBodyScrollDisabled(true);
     };
     
     // NEXT IMAGE HANDLER

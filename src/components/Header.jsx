@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router";
 import { useState, useEffect, useRef } from "react";
 import { useCart } from "../contexts/CartContext";
+import { useOverlay } from "../contexts/OverlayContext";
 import CartOverlay from "./CartOverlay";
 import '../index.css';
 
-// GraphQL query to get all categories
 const GET_CATEGORIES_QUERY = `
     query {
         categories {
@@ -18,6 +18,8 @@ const Header = () => {
   const [transitioningLink, setTransitioningLink] = useState(null);
   const location = useLocation();
   const { cartItems, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, setCartItems } = useCart();
+  const { setIsOverlayActive, setIsBodyScrollDisabled } = useOverlay();
+  const mobileMenuRef = useRef(null);
   const mobileCartRef = useRef(null);
   const desktopCartRef = useRef(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -66,12 +68,13 @@ const Header = () => {
         (!desktopCartRef.current || !desktopCartRef.current.contains(event.target))
       ) {
         setIsCartOpen(false);
-        document.querySelector('main').classList.remove('overlay-active');
+        setIsOverlayActive(false);
+        setIsBodyScrollDisabled(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isCartOpen, setIsCartOpen]);
+  }, [isCartOpen, setIsCartOpen, setIsOverlayActive, setIsBodyScrollDisabled]);
 
   // AUTO CLOSE CART AFTER ORDER SUCCESS
   useEffect(() => {
@@ -79,12 +82,13 @@ const Header = () => {
       const timer = setTimeout(() => {
         setOrderSuccess(false);
         setIsCartOpen(false);
-        document.querySelector('main').classList.remove('overlay-active');
+        setIsOverlayActive(false);
+        setIsBodyScrollDisabled(false);
       }, 3000);
 
       return () => clearTimeout(timer);
     }
-  }, [orderSuccess]);
+  }, [orderSuccess, setIsCartOpen, setIsOverlayActive, setIsBodyScrollDisabled]);
 
   // HANDLE LINK CLICK
   const handleLinkClick = (link) => {
@@ -93,27 +97,18 @@ const Header = () => {
       setActiveLink(link);
       setTimeout(() => setTransitioningLink(null), 300);
     }
-    const mobileMenuToggle = document.querySelector('.navbar-toggler');
-    if (mobileMenuToggle?.getAttribute('aria-expanded') === 'true') {
-      mobileMenuToggle.click();
+    if (mobileMenuRef.current?.getAttribute('aria-expanded') === 'true') {
+      mobileMenuRef.current.click();
     }
   };
 
   // TOGGLE CART
   const toggleCart = () => {
-    const newState = !isCartOpen;
-    setIsCartOpen(newState);
-    const mainElement = document.querySelector('main');
-    if (mainElement) {
-      mainElement.classList.toggle('overlay-active', newState);
-    }
+      const newState = !isCartOpen;
+      setIsCartOpen(newState);
+      setIsOverlayActive(newState);
+      setIsBodyScrollDisabled(newState);
   };
-
-  // DISABLE BODY SCROLL WHEN CART IS OPEN
-  useEffect(() => {
-    document.body.style.overflow = isCartOpen ? 'hidden' : 'auto';
-    return () => { document.body.style.overflow = 'auto'; };
-  }, [isCartOpen]);
 
   // CALCULATE TOTAL PRICE
   const totalPrice = cartItems.reduce((sum, item) => {
@@ -249,7 +244,7 @@ const Header = () => {
             />
           </div>
 
-          <button type="button" className="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
+          <button ref={mobileMenuRef} type="button" className="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
             <span className="navbar-toggler-icon"></span>
           </button>
         </div>

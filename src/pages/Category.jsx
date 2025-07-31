@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useCart } from '../contexts/CartContext';
+import { useOverlay } from '../contexts/OverlayContext';
 
 import Loading from '../components/Loading';
 import ErrorPage from './ErrorPage';
@@ -42,6 +43,7 @@ const Category = () => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const { addToCart, toggleCart } = useCart();
+    const { setIsOverlayActive, setIsBodyScrollDisabled } = useOverlay();
 
     const { category } = useParams();
     const categoryName = category;
@@ -99,10 +101,8 @@ const Category = () => {
         addToCart(productToAdd);
         toggleCart(); 
 
-        const mainElement = document.querySelector('main');
-        if (mainElement) {
-            mainElement.classList.add('overlay-active');
-        }
+        setIsOverlayActive(true);
+        setIsBodyScrollDisabled(true);
     };
 
     // LOADING
