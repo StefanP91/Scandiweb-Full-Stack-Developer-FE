@@ -1,27 +1,28 @@
 import { memo } from 'react';
+import styles from './CartItem.module.css';
 
 const CartItem = memo(({ item, updateQuantity, removeFromCart }) => {
     return (
-        <div key={item.id} className="cart-item">
+        <div key={item.id} className={styles.cartItem}>
             <div className="row">
                 <div className="col-5 col-md-5">
                     {/* PRODUCT NAME */}
-                    <p className="product-name">{item.name}</p>
-                    
+                    <p className={styles.productName}>{item.name}</p>
+
                     {/* PRODUCT PRICE */}
-                    <p className="product-price">
+                    <p className={styles.productPrice}>
                         {item.prices[0].currency.symbol}
                         {item.prices[0].amount}
                     </p>
 
                     {/* ATTRIBUTES */}
                     {item.attributes && item.attributes.length > 0 && (
-                        <div className="cart-item-attributes">
+                        <div className={styles.cartItemAttributes}>
                             {item.attributes.map((attribute) => (
-                                <div key={attribute.id} className="cart-attribute-group">
-                                    <p className="cart-attribute-name">{attribute.name}:</p>
+                                <div key={attribute.id} className={styles.cartAttributeGroup}>
+                                    <p className={styles.cartAttributeName}>{attribute.name}:</p>
 
-                                    <div className="cart-attribute-options">
+                                    <div className={styles.cartAttributeOptions}>
                                         {attribute.items.map((attrItem) => {
                                             const itemValueKebab = attrItem.displayValue.toLowerCase().replace(/\s+/g, "-");
                                             const attributeNameKebab = attribute.name.toLowerCase().replace(/\s+/g, "-");
@@ -33,7 +34,7 @@ const CartItem = memo(({ item, updateQuantity, removeFromCart }) => {
                                                 // Color swatch
                                                 <div
                                                     key={attrItem.id}
-                                                    className={`cart-color-option ${isSelected ? "selectedColor" : "unselectedColor"}`}
+                                                    className={`${styles.cartColorOption} ${isSelected ? styles.selectedColor : styles.unselectedColor}`}
                                                     style={{ backgroundColor: attrItem.value }}
                                                     data-testid={isSelected 
                                                         ? `cart-item-attribute-${attributeNameKebab}-${itemValueKebab}-selected` 
@@ -43,7 +44,7 @@ const CartItem = memo(({ item, updateQuantity, removeFromCart }) => {
                                                 // Text option (size, etc)
                                                 <div
                                                     key={attrItem.id}
-                                                    className={`cart-text-option ${isSelected ? "selectedText" : "unselectedText"}`}
+                                                    className={`${styles.cartTextOption} ${isSelected ? styles.selectedText : styles.unselectedText}`}
                                                     data-testid={isSelected 
                                                         ? `cart-item-attribute-${attributeNameKebab}-${itemValueKebab}-selected` 
                                                         : `cart-item-attribute-${attributeNameKebab}-${itemValueKebab}`}
@@ -61,19 +62,19 @@ const CartItem = memo(({ item, updateQuantity, removeFromCart }) => {
 
                 <div className="col-2 col-md-2">
                     {/* QUANTITY BUTTONS */}
-                    <div className="cart-quantity-control">
+                    <div className={styles.cartQuantityControl}>
                         <button
-                            className="cart-quantity-btn"
+                            className={styles.cartQuantityBtn}
                             onClick={() => updateQuantity(item.cartItemId || item.id, (item.quantity || 1) + 1)}
                             data-testid='cart-item-amount-increase'
                         >
                             +
                         </button>
 
-                        <span className="cart-quantity" data-testid='cart-item-amount'>{item.quantity || 1}</span>
+                        <span className={styles.cartQuantity} data-testid='cart-item-amount'>{item.quantity || 1}</span>
 
                         <button
-                            className="cart-quantity-btn"
+                            className={styles.cartQuantityBtn}
                             onClick={() => {
                                 const currentQty = item.quantity || 1;
                                 if (currentQty === 1) {
@@ -92,7 +93,7 @@ const CartItem = memo(({ item, updateQuantity, removeFromCart }) => {
 
                 {/* PRODUCT IMAGE */}
                 <div className="col-5 col-md-5">
-                    <div className="cart-item-image">
+                    <div className={styles.cartItemImage}>
                         <img src={item.gallery?.[0] || ""} alt={item.name} />
                     </div>
                 </div>
@@ -101,5 +102,4 @@ const CartItem = memo(({ item, updateQuantity, removeFromCart }) => {
     );
 });
 
-CartItem.displayName = 'CartItem';
 export default CartItem;

@@ -1,8 +1,8 @@
 import { Outlet } from "react-router";
-import { useOverlay } from "../contexts/OverlayContext";
+import { useOverlay } from "../../../contexts/OverlayContext";
 import { useEffect } from "react";
 
-import '../index.css';
+import style from './Main.module.css'
 
 const Main = () => {
   const { isOverlayActive, isBodyScrollDisabled } = useOverlay();
@@ -13,7 +13,7 @@ const Main = () => {
   }, [isBodyScrollDisabled]);
 
   return (
-    <main className={`flex-grow-1 position-relative h-100 ${isOverlayActive ? 'overlay-active' : ''}`}>
+    <main className={`flex-grow-1 position-relative h-100 ${isOverlayActive ? style.overlayActive : ''}`}>
         <Outlet />
     </main>
   );

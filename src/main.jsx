@@ -11,7 +11,7 @@ import Category from './pages/Category.jsx'
 import ProductDetail from './pages/ProductDetail.jsx'
 
 // Error Page
-import ErrorPage from './pages/ErrorPage.jsx'
+import ErrorPage from './components/common/Error/ErrorPage.jsx'
 
 import './index.css'
 

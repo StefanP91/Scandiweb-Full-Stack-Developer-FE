@@ -1,98 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "react-router";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from 'rehype-raw'
-import { useCart } from "../contexts/CartContext";
-import { useOverlay } from "../contexts/OverlayContext";
+import { useProduct } from "../features/products/hooks/useProducts";
+import { useCartOverlay } from '../features/cart/hooks/useCartOverlay';
 
-import Loading from "../components/Loading";
-import ErrorPage from "./ErrorPage";
+import Loading from "../components/common/Loading/Loading";
+import ErrorPage from "../components/common/Error/ErrorPage";
 
-const GET_PRODUCT_DETAILS_QUERY = `
-    query {
-        products {
-            id
-            name
-            brand
-            inStock
-            gallery
-            description
-            category
-            attributes {
-                id
-                name
-                type
-                items {
-                    id
-                    value
-                    displayValue
-                }
-            }
-            prices {
-                amount
-                currency {
-                    label
-                    symbol
-                }
-            }
-        }
-    }
-`;
+import style from '../shared/styles/product.module.css';
 
 const ProductDetail = () => {
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [selectedAttributes, setSelectedAttributes] = useState({});
     const [hasInteractedWithAttributes, setHasInteractedWithAttributes] = useState(false);
     const { productId } = useParams();
-    const { addToCart, setIsCartOpen } = useCart();
-    const { setIsOverlayActive, setIsBodyScrollDisabled } = useOverlay();
-
-    // FETCH PRODUCT DETAILS
-    useEffect(() => {
-        const fetchProductDetails = async () => {
-            setLoading(true); 
-            setError(null);
-
-            try {
-                const response = await fetch('/backend/public/graphql', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: GET_PRODUCT_DETAILS_QUERY })
-                });
-                
-                const result = await response.json();
-                
-                if (result.errors) {
-                    throw new Error(result.errors[0].message);
-                }
-
-                const foundProduct = result.data.products.find(prod => prod.id === productId);
-                
-                if (!foundProduct) {
-                    throw new Error("Product not found");
-                }
-                
-                setProduct(foundProduct);
-                setLoading(false);
-                setCurrentImageIndex(0);
-            } 
-            
-            catch (error) {
-                console.error('Error fetching product:', error);
-                setError(error.message);
-                setLoading(false);
-            }
-
-            finally{
-                setLoading(false);
-            }
-        };
-
-        fetchProductDetails();
-    }, [productId]);
+    const { product, loading, error } = useProduct(productId);
+    const { addToCartWithOverlay } = useCartOverlay();
 
     // ADD TO CART HANDLER
     const handleAddToCart = () => {
@@ -103,10 +27,7 @@ const ProductDetail = () => {
             selectedAttributes: {...selectedAttributes}
         };
         
-        addToCart(productToAdd);
-        setIsCartOpen(true);
-        setIsOverlayActive(true);
-        setIsBodyScrollDisabled(true);
+        addToCartWithOverlay(productToAdd);
     };
     
     // NEXT IMAGE HANDLER
@@ -176,17 +97,17 @@ const ProductDetail = () => {
     } 
 
     return (
-        <div className="container py-6 product-detail">
+        <div className={`container ${style.productDetail}`}>
             <div className="row">
                 <div className="col-md-2 col-lg-1">
-                    <div className="image-thumbnails mt-3">
+                    <div className={`${style.imageThumbnails} mt-3`}>
                         {/* IMAGE GALLERY */}
                         {product.gallery && product.gallery.map((img, index) => (
                             <img 
                                 key={index}
                                 src={img} 
                                 alt={`${product.name} thumbnail ${index}`}
-                                className={`thumbnail-image mb-2 ${index === currentImageIndex ? 'active' : ''}`}
+                                className={`${style.thumbnailImage} mb-2 ${index === currentImageIndex ? 'active' : ''}`}
                                 onClick={() => selectImage(index)}
                             />
                         ))}
@@ -194,29 +115,28 @@ const ProductDetail = () => {
                 </div>
 
                 <div className="col-md-6">
-                    <div className="product-images position-relative" data-testid="product-gallery">
+                    <div className={`${style.productImages}`} data-testid="product-gallery">
                         {product.gallery && product.gallery.length > 0 && (
                             <>  
                                 {/* MAIN IMAGE */}
                                 <img
                                     src={product.gallery[currentImageIndex]} 
                                     alt={product.name} 
-                                    className="img-fluid main-product-image"
+                                    className={`img-fluid ${style.mainProductImage}`}
                                 />
                                 
                                 {/* CAROUSEL BUTTONS */}
                                 {product.gallery.length > 1 && (
                                     <>
                                         <button 
-                                            className="carousel-control prev" 
+                                            className={`${style.carouselControl} ${style.prev}`} 
                                             onClick={prevImage}
-                                            
                                         >
                                             &lt;
                                         </button>
 
                                         <button 
-                                            className="carousel-control next" 
+                                            className={`${style.carouselControl} ${style.next}`} 
                                             onClick={nextImage}
                                         >
                                             &gt;
@@ -229,25 +149,25 @@ const ProductDetail = () => {
                 </div>
                 
                 <div className="col-md-4 offset-lg-1">
-                    <h1 className="product-name">{product.name}</h1>
-                    
+                    <h1 className={style.productName}>{product.name}</h1>
+
                     {/* ATTRIBUTES */}
                     {product.attributes && product.attributes.map(attr => {
                         const attrNameKebab = attr.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
                         return(
-                            <div key={attr.id} className="product-attribute mt-4" data-testid={`product-attribute-${attrNameKebab}`}>
+                            <div key={attr.id} className={`${style.productAttribute} mt-4`} data-testid={`product-attribute-${attrNameKebab}`}>
 
-                                <h4 className="attribute-name">{attr.name}:</h4>
+                                <h4 className={style.attributeName}>{attr.name}:</h4>
 
-                                <div className="attribute-values d-flex flex-wrap">
+                                <div className={`${style.attributeValues} d-flex flex-wrap`}>
                                     {attr.items.map(item => {
                                         const isSelected = selectedAttributes[attr.id] === item.id;
 
                                         return (
                                             <button 
                                                 key={item.id} 
-                                                className={`attribute-btn ${attr.type === 'swatch' ? 'swatch' : ''} ${isSelected ? 'selected' : ''}`}
+                                                className={`${style.attributeBtn} ${attr.type === 'swatch' ? style.swatch : ''} ${isSelected ? style.selected : ''}`}
                                                 style={attr.type === 'swatch' ? { backgroundColor: item.value } : {}}
                                                 onClick={() => handleAttributeChange(attr.id, item.id)}
                                                 data-testid={`product-attribute-${attrNameKebab}-${attr.type === 'swatch' ? item.value : item.displayValue}`}
@@ -262,11 +182,11 @@ const ProductDetail = () => {
                     })}
           
                     {/* PRICE */}
-                    <div className="product-price mt-4">
+                    <div className={`${style.productPrice} mt-4`}>
                         <h4>PRICE:</h4>
                         
                         {product.prices && product.prices.length > 0 && (
-                            <p className="price-amount">
+                            <p className={`${style.priceAmount}`}>
                                 {product.prices[0].currency.symbol}{product.prices[0].amount}
                             </p>
                         )}
@@ -274,7 +194,7 @@ const ProductDetail = () => {
                     
                     {/* ADD TO CART BUTTON */}
                     <button 
-                        className={`add-to-cart-btn ${!areAllAttributesSelected() || !product.inStock ? 'disabled' : ''}`}
+                        className={`${style.addToCartBtn} ${!areAllAttributesSelected() || !product.inStock ? style.disabled : ''}`}
                         disabled={!areAllAttributesSelected() || !product.inStock}
                         onClick={handleAddToCart}
                         data-testid="add-to-cart"
@@ -286,7 +206,7 @@ const ProductDetail = () => {
                     </button>
                     
                     {/* DESCRIPTION */}
-                    <div className="product-description mt-4" data-testid="product-description"> 
+                    <div className={`${style.productDescription} mt-4`} data-testid="product-description"> 
                         <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                             {product.description}
                         </ReactMarkdown>

@@ -1,5 +1,5 @@
-import { useCart } from '../contexts/CartContext';
-import { useOverlay } from '../contexts/OverlayContext';
+import { useCart } from '../utils/CartContext';
+import { useOverlay } from '../../../contexts/OverlayContext';
 import { useCallback } from 'react';
 
 export const useCartOverlay = () => {

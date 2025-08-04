@@ -1,0 +1,25 @@
+
+.pageTitle{
+    font-size: 42px;
+    font-weight: 400;
+    color: #1D1F22;
+    padding: 10% 0 5% 0;
+}
+
+/* <--------------------------------------- TABLET AND MOBILE VIEW --------------------------------------> */
+
+/* TABLET */
+@media (min-width: 436px) and (max-width: 768px){
+    .pageTitle{
+        font-size: 35px;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 435px){
+    .pageTitle{
+        font-size: 28px;
+        text-align: center;
+        margin-top: 10%;
+    }
+}

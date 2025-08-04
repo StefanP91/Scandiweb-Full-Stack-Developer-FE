@@ -1,99 +1,26 @@
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { useCartOverlay } from '../hooks/useCartOverlay';
+import { useProductsByCategory } from '../features/products/hooks/useProducts';
+import { useCartOverlay } from '../features/cart/hooks/useCartOverlay';
+import { generateDefaultAttributes, isProductInStock } from '../features/products/utils/productHelpers';
 
-import Loading from '../components/Loading';
-import ErrorPage from './ErrorPage';
+import Loading from '../components/common/Loading/Loading';
+import ErrorPage from '../components/common/Error/ErrorPage';
 
-const getProductsByCategoryQuery = (category) => `
-    query {
-        products(category: "${category}") {
-            id
-            name
-            brand
-            inStock
-            gallery
-            description
-            category
-            attributes {
-                id
-                name
-                type
-                items {
-                    id
-                    value
-                    displayValue
-                }
-            }
-            prices {
-                amount
-                currency {
-                    label
-                    symbol
-                }
-            }
-        }
-    }
-`;
+import style from '../shared/styles/products.module.css';
+import layoutStyles from '../shared/styles/layout.module.css';
 
 const Category = () => {
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true); 
-    const [error, setError] = useState(null);
+    const { category } = useParams();
     const navigate = useNavigate();
+    const { products, loading, error } = useProductsByCategory(category);
     const { addToCartWithOverlay } = useCartOverlay();
 
-    const { category } = useParams();
-    const categoryName = category;
-
-    // FETCH PRODUCTS BY CATEGORY
-    useEffect(() => {
-        const fetchProductsByCategory = async () => {
-            if (!categoryName) return;
-            
-            setLoading(true);
-            try {
-                const response = await fetch('/backend/public/graphql', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: getProductsByCategoryQuery(categoryName) })
-                });
-                
-                const result = await response.json();
-                
-                if (result.errors) {
-                    throw new Error(result.errors[0].message);
-                }
-                
-                setProducts(result.data.products || []);
-            } catch (error) {
-                console.error('Error fetching products:', error);
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProductsByCategory();
-    }, [categoryName]);
-
-    // HANDLE ADD TO CART
     const handleAddToCart = (event, product) => {
         event.stopPropagation();
-
-        const defaultSelectedAttributes = {};
-
-        if (product.attributes && product.attributes.length > 0) {
-            product.attributes.forEach(attr => {
-                if (attr.items && attr.items.length > 0) {
-                    defaultSelectedAttributes[attr.id] = attr.items[0].id;
-                }
-            });
-        }
         
         const productToAdd = {
             ...product,
-            selectedAttributes: defaultSelectedAttributes
+            selectedAttributes: generateDefaultAttributes(product.attributes)
         };
         
         addToCartWithOverlay(productToAdd);
@@ -111,40 +38,43 @@ const Category = () => {
 
     return (
         <div className="container">
-            <h1 className="page-title">{categoryName?.toUpperCase()}</h1>
-            
+            <h1 className={layoutStyles.pageTitle}>{category?.toUpperCase()}</h1>
+
             <div className="row g-4">
                 {products.map(product => (
                     <div className="col-12 col-md-4" key={product.id}>
                         <div 
-                            className="card"
+                            className={style.card}
                             onClick={() => navigate(`/product/${product.id}`)} 
                             data-testid={`product-${product.name ? product.name.toLowerCase().split(' ').join('-') : product.id}`}
                         >
                             {/* IMAGE, QUICK SHOP ICON AND OUT OF STOCK TEXT */}
-                            <div className="img-container">
+                            <div className={style.imgContainer}>
                                 <img
                                     src={product.gallery && product.gallery.length > 0 ? product.gallery[0] : ''}
                                     alt={product.name}
-                                    className="product-image"
+                                    className={style.productImage}
                                 />
-                                {product.inStock === false ? (
-                                    <img src="../images/quick-shop-icon.png" alt="quick-shop-icon" className="quick-shop-icon d-none" />
+                                {/* QUICK SHOP ICON */}
+                                {!isProductInStock(product) ? (
+                                    <img src="../images/quick-shop-icon.png" alt="quick-shop-icon" className={`${style.quickShopIcon} d-none`} />
                                 ) : (
-                                    <img src="../images/quick-shop-icon.png" alt="quick-shop-icon" className="quick-shop-icon" onClick={(event) => handleAddToCart(event, product)} />
+                                    <img src="../images/quick-shop-icon.png" alt="quick-shop-icon" className={style.quickShopIcon} onClick={(event) => handleAddToCart(event, product)} />
                                 )}
-                                {product.inStock === false ? (
-                                    <p className="card-stock">OUT OF STOCK</p>
+                                
+                                {/* OUT OF STOCK TEXT */}
+                                {!isProductInStock(product) ? (
+                                    <p className={style.cardStock}>OUT OF STOCK</p>
                                 ) : (
                                     <p className="d-none">OUT OF STOCK</p>
                                 )}
                             </div>
 
                             {/* PRODUCT NAME AND PRICE */}    
-                            <div className="card-body">
-                                <h5 className="card-title">{product.name}</h5>
+                            <div className={style.cardBody}>
+                                <h5 className={style.cardTitle}>{product.name}</h5>
                                 {product.prices && product.prices.length > 0 && (
-                                    <p className={product.inStock === false ? "card-price-stock-0" : "card-price"}>
+                                    <p className={!isProductInStock(product) ? style.cardPriceStock0 : style.cardPrice}>
                                         {product.prices[0].currency.symbol}{product.prices[0].amount}
                                     </p>
                                 )}

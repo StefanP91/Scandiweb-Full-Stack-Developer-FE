@@ -1,0 +1,193 @@
+.flexContainer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+header{
+    position: fixed;
+    width: 100%;
+    background-color: #FFFFFF;
+    z-index: 999;
+
+    & .orderSuccessMessage {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #4CAF50;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 5px;
+        z-index: 9999;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        animation: fadeInOut 3s forwards;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+}
+
+.headerLink {
+    text-decoration: none;
+    padding: 8px;
+    color: #1D1F22;
+    position: relative;
+    display: inline-block;
+}
+
+.headerLink:hover{
+    font-weight: 600;
+    color: #5ECE7B;
+}
+
+.headerLink.active{
+    font-weight: 600;
+    color: #5ECE7B;
+}
+
+.headerLink::before {
+    content: '';
+    display: block;
+    height: 2px;
+    background: #5ECE7B;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    transition: width 0.3s ease-in-out;
+}
+
+.headerLink:hover::before,
+.headerLink.active::before {
+    width: 100%;
+}
+
+.headerLink.transitioning::before {
+    width: 100%; 
+}
+
+.headerLink.active::before {
+    width: 100%; 
+}
+
+.headerLink.active {
+    position: relative;
+}
+
+.headerLink.transitioning {
+    position: relative;
+}
+
+.headerLink.active::before {
+    animation: slideIn 0.7s forwards;
+}
+
+.headerLink.transitioning::before {
+    animation: slideOut 0.7s forwards;
+    left: auto;
+    right: 0;
+}
+
+@keyframes slideIn {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0;
+    }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* <--------------------------------------- TABLET AND MOBILE VIEW --------------------------------------> */
+
+/* TABLET */
+@media (min-width: 436px) and (max-width: 768px){
+    .flexContainer {
+        flex-direction: row !important;
+    }
+
+    .cart{
+        order: 1 !important;
+    }
+    
+    .navbarBrand{
+        order: 2 !important;
+    }
+
+    .navbarCollapse {
+        transition: none !important; 
+        order: 3 !important;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 435px){
+    .flexContainer {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        position: relative !important;
+    }
+
+    .flexContainer .cart{
+        position: sticky;
+        order: 1 !important;
+    }
+
+    .flexContainer .navbarBrand{
+        position: sticky;
+        order: 2 !important;
+    }
+
+    .flexContainer .navbarButton { 
+        order: 3 !important;
+    }
+
+    .flexContainer .navbarCollapse {
+        transition: none !important;
+        position: absolute !important;  
+        top: 100% !important;           
+        left: 0 !important;
+        right: 0 !important; 
+        background: white !important;
+        z-index: 998 !important;
+        width: 100% !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+        text-align: center !important;
+    }
+
+    .orderSuccessMessage {
+        font-size: 14px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+}

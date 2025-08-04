@@ -1,8 +1,10 @@
 
-import Header from './components/Header'
-import Main from './components/Main'
-import { CartProvider } from './contexts/CartContext';
+import Header from './components/layout/Header/Header'
+import Main from './components/layout/Main/Main'
+
+import { CartProvider } from './features/cart/utils/CartContext';
 import { OverlayProvider } from './contexts/OverlayContext';
+
 import './index.css'
 
 function Root() {
@@ -13,7 +15,7 @@ function Root() {
         <CartProvider>
           <Header />
           <Main />
-          </CartProvider>
+        </CartProvider>
       </OverlayProvider>
     </>
   )

@@ -1,0 +1,141 @@
+.card{
+    height: 444px;
+    padding: 5%;
+    border: none;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    
+    & .imgContainer{
+        position: relative;
+
+        & .productImage{
+            height: 330px !important;
+            width: 100% !important;
+        }
+
+        & .quickShopIcon{
+            position: absolute;
+            bottom: 0;
+            right: 1%;
+            transform: translateY(50%);
+            width: 52px;
+            height: 52px;
+            display: none;
+            opacity: 0.7;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        & .quickShopIcon:hover{
+            opacity: 1;
+        }
+
+        & .cardStock{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #8D8F9A;    
+            background-color: rgba(255, 255, 255, 0.5);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            
+        }
+    }
+
+    & .cardBody{
+        & .cardTitle{
+            font-size: 18px;
+            font-weight: 300;
+            color: #1D1F22;
+        }
+
+        & .cardPrice{
+            font-size: 18px;
+            font-weight: 600;
+            color: #1D1F22;
+        }
+
+        & .cardPriceStock0{
+            font-size: 18px;
+            font-weight: 600;
+            color: #8D8F9A;
+        }
+    }
+}
+
+.card:hover{
+    box-shadow: 0 4px 8px rgba(168, 172, 176, 0.19);
+    transform: translateY(-5px);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    cursor: pointer;
+
+    & .quickShopIcon{
+        display: block;
+    }
+    
+}
+
+/* <--------------------------------------- TABLET AND MOBILE VIEW --------------------------------------> */
+
+/* TABLET */
+@media (min-width: 436px) and (max-width: 768px){
+   
+    .card{
+        height: 350px;
+        
+        & .imgContainer{
+            position: relative;
+
+            & .productImage{
+                height: 250px !important;
+                width: 100% !important;
+            }
+
+            & .cardStock{
+                font-size: 20px;
+            }
+        }
+    }   
+}
+
+/* MOBILE */
+@media (max-width: 435px){    
+    .card{
+        height: fit-content;
+        
+        & .imgContainer{
+            position: relative;
+
+            & .productImage{
+                height: 300px !important;
+                width: 100% !important;
+            }
+
+            & .cardStock{
+                font-size: 18px;
+            }
+        }
+
+        & .cardBody{
+            text-align: center;
+
+            & .cardTitle{
+                font-size: 16px;
+            }
+
+            & .cardPrice{
+                font-size: 16px;
+            }
+
+            & .cardPriceStock0{
+                font-size: 16px;
+            }
+        }
+    }
+}

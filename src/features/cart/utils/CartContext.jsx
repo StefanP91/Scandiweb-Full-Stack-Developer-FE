@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useOverlay } from './OverlayContext'; 
+import { useOverlay } from '../../../contexts/OverlayContext';
+import { cartService } from '../services/cartService'; 
 
 const CartContext = createContext();
 
@@ -23,8 +24,8 @@ export const CartProvider = ({ children }) => {
   const { setIsOverlayActive, setIsBodyScrollDisabled } = useOverlay();
   
   const generateProductAttributeId = useCallback((product) => {
-  if (!product.selectedAttributes || Object.keys(product.selectedAttributes).length === 0) {
-    return product.id;
+    if (!product.selectedAttributes || Object.keys(product.selectedAttributes).length === 0) {
+      return product.id;
   }
 
   const attributeString = Object.entries(product.selectedAttributes)
@@ -36,29 +37,29 @@ export const CartProvider = ({ children }) => {
 }, []);
 
   const addToCart = useCallback((product, quantity = 1) => {
-  setCartItems(prevItems => {
-    const uniqueCartId = generateProductAttributeId(product);
-    
-    const existingItemIndex = prevItems.findIndex(item => 
-      generateProductAttributeId(item) === uniqueCartId
-    );
-    
-    if (existingItemIndex > -1) {
-        const updatedItems = [...prevItems];
-        updatedItems[existingItemIndex] = {
-          ...updatedItems[existingItemIndex],
-          quantity: (updatedItems[existingItemIndex].quantity || 1) + quantity
-        };
+    setCartItems(prevItems => {
+      const uniqueCartId = generateProductAttributeId(product);
+      
+      const existingItemIndex = prevItems.findIndex(item => 
+        generateProductAttributeId(item) === uniqueCartId
+      );
+      
+      if (existingItemIndex > -1) {
+          const updatedItems = [...prevItems];
+          updatedItems[existingItemIndex] = {
+            ...updatedItems[existingItemIndex],
+            quantity: (updatedItems[existingItemIndex].quantity || 1) + quantity
+          };
 
-      return updatedItems;
-    } else {
-      return [...prevItems, { 
-        ...product, 
-        quantity,
-        cartItemId: uniqueCartId 
-      }];
-    }
-  });
+        return updatedItems;
+      } else {
+        return [...prevItems, { 
+          ...product, 
+          quantity,
+          cartItemId: uniqueCartId 
+        }];
+      }
+    });
 }, [generateProductAttributeId]);
 
   const addToCartWithOverlay = useCallback((product, quantity = 1) => {
@@ -74,11 +75,8 @@ export const CartProvider = ({ children }) => {
     } 
     
     setCartItems(prevItems => prevItems.map(item => {
-
       const itemIdentifier = item.cartItemId || item.id;
-
       return itemIdentifier === itemId 
-      
       ? { ...item, quantity: newQuantity } 
       : item;
     }));
@@ -110,43 +108,9 @@ export const CartProvider = ({ children }) => {
     setOrderSuccess(false);
 
     try {
-      const orderItems = cartItems.map(item => ({
-        productId: item.id,
-        quantity: item.quantity || 1,
-        price: item.prices?.[0]?.amount || 0,
-        selectedAttributes: item.selectedAttributes ?
-          Object.entries(item.selectedAttributes).map(([name, value]) => ({ name, value })) : []
-      }));
-
-      const query = `
-        mutation CreateOrder($input: OrderInput!) {
-          createOrder(input: $input) {
-            id
-            orderNumber
-            createdAt
-            total
-          }
-        }
-      `;
-
-      const variables = {
-        input: {
-          items: orderItems,
-          currency: cartItems[0]?.prices[0]?.currency?.symbol || 'USD'
-        }
-      };
-
-      const response = await fetch('/backend/public/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables })
-      });
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const result = await response.json();
-      if (result.errors) throw new Error(result.errors.map(e => e.message).join(', '));
-
+      // ✅ Replace the entire try block with this clean service call:
+      await cartService.createOrder(cartItems);
+      
       setCartItems([]);
       setOrderSuccess(true);
       
@@ -164,7 +128,7 @@ export const CartProvider = ({ children }) => {
       setIsPlacingOrder(false);
     }
   }, [cartItems, closeCart]);
-
+  
   const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
   
   const totalPrice = cartItems.reduce((sum, item) => {

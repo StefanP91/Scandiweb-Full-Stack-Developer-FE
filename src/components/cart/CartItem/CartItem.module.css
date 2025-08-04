@@ -1,0 +1,103 @@
+.productName{
+    font-size: 18px;
+    font-weight: 300;
+    color: #1D1F22;
+}
+
+.productPrice{
+    color: #1D1F22;
+    font-weight: 600;
+}
+
+.cartItemAttributes{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    & .cartAttributeGroup{
+        & .cartAttributeName{
+            font-size: 14px;
+            color: #1D1F22;
+            margin: 1%;
+        }
+    }
+
+    & .cartAttributeOptions{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+
+        & .selectedText{
+            border: 1px solid #1D1F22;
+            background-color: #1D1F22;
+            color: #FFFFFF;
+            font-size: 14px;
+            padding: 0 2%; 
+        }
+
+        & .selectedColor{
+            outline: 1px solid #5ECE7B;
+            outline-offset: 1px;
+        }
+
+        & .cartColorOption{
+            width: 20px;
+            height: 20px;
+        }
+
+        & .unselectedText,
+        & .unselectedColor{
+            border: 1px solid #1D1F22;
+            background-color: transparent;
+            color: #1D1F22;
+            font-size: 14px;
+            padding: 0 2%;
+        }
+    }
+}
+
+.cartQuantityControl{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+
+    & .cartQuantityBtn{
+        width: 24px;
+        height: 24px;
+        border: 1px solid #1D1F22;
+        background-color: transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+    }
+
+    & .cartQuantityBtn:hover{
+        background-color: #1D1F22;
+        color: #FFFFFF;
+        cursor: pointer;
+    }
+
+    & .cartQuantityBtn:active{
+        transform: scale(0.9);
+    }
+
+    & .cartQuantity{
+        color: #1D1F22;
+        font-weight: 600;
+    }
+}
+
+.cartItemImage{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    
+    & img{
+        width: 100%;
+        object-fit: cover;
+    }
+}

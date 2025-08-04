@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
-import { useCartOverlay } from "../hooks/useCartOverlay";
-import CartItem from "./CartItem";
+import { useCartOverlay } from "../../../features/cart/hooks/useCartOverlay";
+import CartItem from "../CartItem/CartItem";
+import styles from "./CartOverlay.module.css";
 
 const CartOverlay = () => {
   const cartOverlayRef = useRef(null);
@@ -22,6 +23,7 @@ const CartOverlay = () => {
     
   } = useCartOverlay();
 
+  // CLOSE CART ON CLICK OUTSIDE
   useEffect(() => {
     if (!isCartOpen) return;
 
@@ -52,24 +54,24 @@ const CartOverlay = () => {
   }, [isCartOpen, closeCart]);
 
   return (
-    <div className="card-container" ref={containerRef} data-testid='cart-item-attribute-${cart-container}'>
+    <div className={styles.cartContainer} ref={containerRef} data-testid='cart-item-attribute-${cart-container}'>
       {/* CART ICON */}
       <button 
-        className="cart-icon" 
+        className={styles.cartIcon} 
         onClick={toggleCart} 
         data-testid="cart-btn"
       >
         <img src="/images/cart-icon.png" alt="cart-icon" />
         {totalItems > 0 && (
-            <span className="cart-badge">
+            <span className={styles.cartBadge}>
                 {totalItems}
             </span>
         )}      
       </button>
 
       {isCartOpen && (
-        <div className="cart-overlay" ref={cartOverlayRef} data-testid='cart-overlay'>
-          <p className="title">
+        <div className={styles.cartOverlay} ref={cartOverlayRef} data-testid='cart-overlay'>
+          <p className={styles.title}>
             <span>My Bag,</span> {totalItems} {totalItems === 1 ? "item" : "items"}
           </p>
 
@@ -85,14 +87,14 @@ const CartOverlay = () => {
               ))}
 
                 {/* CART TOTAL */}
-              <div className="cart-total" data-testid='cart-total'>
-                <p className="total-name">Total:</p>
-                <p className="total-amount" data-testid='cart-total'>{currencySymbol}{totalPrice}</p>
+              <div className={styles.cartTotal} data-testid='cart-total'>
+                <p className={styles.totalName}>Total:</p>
+                <p className={styles.totalAmount} data-testid='cart-total'>{currencySymbol}{totalPrice}</p>
               </div>
 
                 {/* PLACE ORDER BUTTON */}
               <button
-                className="place-order-btn"
+                className={styles.placeOrderBtn}
                 onClick={handlePlaceOrder}
                 disabled={isPlacingOrder || cartItems.length === 0}
               >
@@ -100,21 +102,21 @@ const CartOverlay = () => {
               </button>
 
                {/* ERROR ORDER MESSAGE */}
-              {orderError && <div className="order-error-message">{orderError}</div>}
+              {orderError && <div className={styles.orderErrorMessage}>{orderError}</div>}
             </>
           ) : (
             <div>
               <p>Your cart is empty</p>
 
-              <div className="cart-total">
-                <p className="total-name">Total:</p>
-                <p className="total-amount">
+              <div className={styles.cartTotal}>
+                <p className={styles.totalName}>Total:</p>
+                <p className={styles.totalAmount}>
                   {currencySymbol}
                   {totalPrice}
                 </p>
               </div>
 
-              <button disabled={true} className="place-order-btn-empty-cart">
+              <button disabled={true} className={styles.placeOrderBtnEmptyCart}>
                 PLACE ORDER
               </button>
             </div>

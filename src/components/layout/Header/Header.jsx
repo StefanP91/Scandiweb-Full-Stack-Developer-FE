@@ -1,23 +1,20 @@
 import { Link, useLocation } from "react-router";
 import { useState, useEffect, useRef } from "react";
-import CartOverlay from "./CartOverlay";
-import { useCartOverlay } from "../hooks/useCartOverlay";
 
-import '../index.css';
+import CartOverlay from "../../cart/CartOverlay/CartOverlay";
+import { useCartOverlay } from "../../../features/cart/hooks/useCartOverlay";
+import { categoryService } from "../../../features/categories/services/categoryService";
 
-const GET_CATEGORIES_QUERY = `
-    query {
-        categories {
-            name
-        }
-    }
-`;
+import styles from "./Header.module.css";
 
 const Header = () => {
   const [activeLink, setActiveLink] = useState(null);
   const [transitioningLink, setTransitioningLink] = useState(null);
+
   const [categories, setCategories] = useState([]);
+
   const { orderSuccess, closeCart, setOrderSuccess } = useCartOverlay();
+  
   const location = useLocation();
   const mobileMenuRef = useRef(null);
 
@@ -25,14 +22,8 @@ const Header = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/backend/public/graphql', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: GET_CATEGORIES_QUERY })
-        });
-        
-        const result = await response.json();
-        setCategories(result.data.categories || []);
+        const data = await categoryService.getAllCategories();
+        setCategories(data);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -85,17 +76,17 @@ const Header = () => {
   return (
     <header className="header">
         {orderSuccess && (
-          <div className="order-success-message">
+          <div className={styles.orderSuccessMessage}>
             Order placed successfully!
           </div>
         )}
       <nav className="navbar navbar-expand-lg">
-        <div className="container d-flex justify-content-between flex-row-reverse flex-lg-row">
-          <div className="collapse navbar-collapse flex-grow-0" id="navMenu">
+        <div className={`container d-flex ${styles.flexContainer}`}>
+          <div className={`collapse navbar-collapse flex-grow-0 ${styles.navbarCollapse}`} id="navMenu">
             <ul className="navbar-nav">
                 <li className="nav-item">
                     <Link
-                        className={`header-link ${activeLink === '/all' ? 'active' : ''} ${transitioningLink === '/all' ? 'transitioning' : ''}`}
+                        className={`${styles.headerLink} ${activeLink === '/all' ? styles.active : ''} ${transitioningLink === '/all' ? styles.transitioning : ''}`}
                         to="/"
                         data-testid={activeLink === '/all' ? 'active-category-link' : 'category-link'}
                         onClick={() => handleLinkClick('/all')}
@@ -112,7 +103,7 @@ const Header = () => {
                   return (
                     <li className="nav-item" key={category.name}>
                         <Link
-                            className={`header-link ${isActive ? 'active' : ''} ${isTransitioning ? 'transitioning' : ''}`}
+                            className={`${styles.headerLink} ${isActive ? styles.active : ''} ${isTransitioning ? styles.transitioning : ''}`}
                             to={categoryPath}
                             data-testid={isActive ? 'active-category-link' : 'category-link'}
                             onClick={() => handleLinkClick(categoryPath)}
@@ -125,15 +116,13 @@ const Header = () => {
             </ul>
           </div>
 
-          <Link className="navbar-brand" to="/">
+          <Link className={`navbar-brand ${styles.navbarBrand}`} to="/">
             <img src="/images/brand.png" alt="brand-logo" />
           </Link>
 
-          <div className="cart"> 
-                <CartOverlay isMobile={isMobile} />
-          </div>
+          <CartOverlay isMobile={isMobile} className={styles.cart} />
 
-          <button ref={mobileMenuRef} type="button" className="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
+          <button ref={mobileMenuRef} type="button" className={`navbar-toggler ${styles.navbarButton}`} data-bs-toggle="collapse" data-bs-target="#navMenu">
             <span className="navbar-toggler-icon"></span>
           </button>
         </div>
